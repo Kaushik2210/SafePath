@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "Incident": {
+      "title": "Incident",
+      "description": "A safety incident reported by a user.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of incident (e.g., theft, harassment, poorly lit)."
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          },
+          "required": ["lat", "lng"]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the incident occurred."
+        },
+        "description": {
+          "type": "string"
+        },
+        "reporterId": {
+          "type": "string",
+          "description": "Anonymous UID of the reporter."
+        }
+      },
+      "required": ["type", "location", "timestamp", "reporterId"]
+    },
+    "BuddySession": {
+      "title": "Buddy Session",
+      "description": "A live tracking session shared with a buddy.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "currentLocation": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "completed", "alert"] }
+      },
+      "required": ["userId", "currentLocation", "lastUpdated", "status"]
+    }
+  },
+  "firestore": {
+    "incidents": {
+      "schema": "Incident",
+      "description": "Collection of reported safety incidents."
+    },
+    "buddy_sessions": {
+      "schema": "BuddySession",
+      "description": "Live tracking sessions for Buddy Mode."
+    }
+  }
+}

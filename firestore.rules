@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidIncident(data) {
+      return data.keys().hasAll(['type', 'location', 'timestamp', 'reporterId']) &&
+             data.type is string && data.type.size() > 0 && data.type.size() < 100 &&
+             data.location is map && data.location.lat is number && data.location.lng is number &&
+             data.timestamp is string &&
+             data.reporterId == request.auth.uid;
+    }
+
+    function isValidBuddySession(data) {
+      return data.keys().hasAll(['userId', 'currentLocation', 'lastUpdated', 'status']) &&
+             data.userId == request.auth.uid &&
+             data.currentLocation is map && data.currentLocation.lat is number && data.currentLocation.lng is number &&
+             data.lastUpdated is string &&
+             data.status in ['active', 'completed', 'alert'];
+    }
+
+    match /incidents/{incidentId} {
+      allow read: if true; // Publicly readable for safety
+      allow create: if isAuthenticated() && isValidIncident(request.resource.data);
+      allow update, delete: if false; // Incidents are immutable for now
+    }
+
+    match /buddy_sessions/{sessionId} {
+      allow read: if true; // Shared via link, but we could restrict if we had a secret key
+      allow create: if isAuthenticated() && isValidBuddySession(request.resource.data);
+      allow update: if isAuthenticated() && isValidBuddySession(request.resource.data) && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "SafePath",
+  "description": "A real-time safety navigation app that uses crowd-sourced incident reports and a safety score engine to guide users through the safest routes.",
+  "requestFramePermissions": ["geolocation"]
+}
